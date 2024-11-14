@@ -1,0 +1,12 @@
+
+**/volume/
+**/log/
+
+**/__pycache__
+**/*.pyc
+
+*.log*
+
+.*
+!.docker*
+!.*.example

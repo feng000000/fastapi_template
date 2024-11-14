@@ -1,0 +1,14 @@
+
+**/volume/
+**/log/
+
+**/__pycache__
+**/*.pyc
+
+*.log*
+
+.*
+!.pre-commit-config.yaml
+!.git*
+!.docker*
+!.*.example
