@@ -1,4 +1,11 @@
-git init
+
+
+if [ -d ".git" ]; then
+    echo ".git directory exists."
+else
+    echo "git init..."
+    git init
+fi
 
 poetry install --no-root
 pre-commit install
