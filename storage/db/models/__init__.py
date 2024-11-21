@@ -1,9 +1,21 @@
 from datetime import datetime
 from enum import Enum
+from typing import Annotated, TypeAlias
 from uuid import UUID, uuid4
 
-from pydantic import ConfigDict, field_validator, model_validator
+from pydantic import ConfigDict
 from sqlmodel import JSON, Column, Field, Index, SQLModel
+
+AUTO_UPDATE: TypeAlias = Annotated[
+    datetime | None,
+    Field(
+        default_factory=datetime.now,
+        nullable=False,
+        sa_column_kwargs={
+            "onupdate": datetime.now,
+        },
+    ),
+]
 
 
 # TODO: define Enum
@@ -15,9 +27,12 @@ class EnumField(str, Enum):
 # TODO: define Table
 class ExampleTable(SQLModel, table=True):
     model_config = ConfigDict(  # type: ignore
-        arbitrary_types_allowed=True,  # allow to define `dict` field
-        validate_assignment=True,  # validate field when create instance
+        # # 允许定义 `dict` 字段
+        arbitrary_types_allowed=True,
+        # 在创建实例时进行验证
+        validate_assignment=True,
     )
+
     __tablename__ = "example_tables"  # type: ignore[assignment]
     __table_args__ = (Index("user_email_idx", "email"),)
 
@@ -25,21 +40,10 @@ class ExampleTable(SQLModel, table=True):
 
     email: str = Field(max_length=255, unique=True, nullable=False)
 
+    # dict/list data
     table_info: dict = Field(sa_column=Column(JSON))
 
-    enum_field: str = Field()
+    enum_field: EnumField
 
     created_at: datetime | None = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(default_factory=datetime.now)
-
-    @model_validator(mode="after")
-    def set_update(self):
-        self.model_config["validate_assignment"] = False  # type: ignore
-        self.updated_at = datetime.now()
-        self.model_config["validate_assignment"] = True  # type: ignore
-        return self
-
-    @field_validator("enum_field")
-    @classmethod
-    def validate_enum_field(cls, value) -> str:
-        return EnumField(value).value
+    updated_at: AUTO_UPDATE
