@@ -1,3 +1,5 @@
+import atexit
+import fcntl
 import logging
 from contextlib import asynccontextmanager
 from logging.handlers import TimedRotatingFileHandler
@@ -13,18 +15,35 @@ logger = logging.getLogger(__name__)
 
 
 def init_logging():
-    api_file_handler = logging.FileHandler(settings.LOG_FILE_PATH)
-    console_handler = logging.StreamHandler()
-    backup_handler = TimedRotatingFileHandler(
-        settings.LOG_FILE_PATH,
-        when="midnight",
-        interval=1,
-        backupCount=14,
-        encoding="utf-8",
-    )
+    handler = [
+        logging.FileHandler(settings.LOG_FILE_PATH),
+        logging.StreamHandler(),
+    ]
+
+    file_lock = open("./api.lock", "wb")
+    try:
+        fcntl.flock(file_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        handler.append(
+            TimedRotatingFileHandler(
+                settings.LOG_FILE_PATH,
+                when="midnight",
+                interval=1,
+                backupCount=14,
+                encoding="utf-8",
+            )
+        )
+    except Exception:
+        pass
+
+    def unlock():
+        fcntl.flock(file_lock, fcntl.LOCK_UN)
+        file_lock.close()
+
+    atexit.register(unlock)
+
     logging.basicConfig(
         level=settings.LOG_LEVEL,
-        handlers=[api_file_handler, console_handler, backup_handler],
+        handlers=handler,
         format="%(asctime)s [%(levelname)s] [%(name)s]: %(message)s\n",
     )
 
@@ -62,6 +81,7 @@ def create_app():
     app.add_middleware(CustomerMiddleware)
 
     app.include_router(api_router, prefix="/api")
+    app.add_api_route("healthy", endpoint=lambda: "success")
 
     return app
 

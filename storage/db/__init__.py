@@ -111,7 +111,7 @@ class AsyncDatabaseConnector:
         self,
         isolation_level=IsolationLevel.READ_COMMITTED,
     ):
-        token = set_session_id(str(uuid4))
+        token = set_session_id(str(uuid4()))
 
         await self.session.connection(
             execution_options={"isolation_level": str(isolation_level)}
