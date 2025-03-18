@@ -15,8 +15,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # TODO: set database url
-from config import settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+from config import config as cfg
+config.set_main_option("sqlalchemy.url", cfg.DATABASE_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -24,7 +24,7 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 # target_metadata = mymodel.Base.metadata
 
 # TODO: set metadata
-from storage.db.models import SQLModel
+from db.models import SQLModel
 target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,

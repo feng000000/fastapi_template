@@ -7,7 +7,7 @@ from logging.handlers import TimedRotatingFileHandler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import settings
+from config import config
 from controllers import api_router
 from middlewares import CustomerMiddleware
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def init_logging():
     handler = [
-        logging.FileHandler(settings.LOG_FILE_PATH),
+        logging.FileHandler(config.LOG_FILE_PATH),
         logging.StreamHandler(),
     ]
 
@@ -25,7 +25,7 @@ def init_logging():
         fcntl.flock(file_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         handler.append(
             TimedRotatingFileHandler(
-                settings.LOG_FILE_PATH,
+                config.LOG_FILE_PATH,
                 when="midnight",
                 interval=1,
                 backupCount=14,
@@ -42,12 +42,12 @@ def init_logging():
     atexit.register(unlock)
 
     logging.basicConfig(
-        level=settings.LOG_LEVEL,
+        level=config.LOG_LEVEL,
         handlers=handler,
         format="%(asctime)s [%(levelname)s] [%(name)s]: %(message)s\n",
     )
 
-    def init_logger(name: str, level: str = settings.LOG_LEVEL):
+    def init_logger(name: str, level: str = config.LOG_LEVEL):
         """specify logger's level"""
         logger = logging.getLogger(name)
         logger.setLevel(level)

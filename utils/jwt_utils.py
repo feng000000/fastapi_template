@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import jwt
 from pydantic import BaseModel
 
-from config import settings
+from config import config
 
 
 class JWTPayload(BaseModel):
@@ -24,7 +24,7 @@ class JWTPayload(BaseModel):
 
 def verify_token(
     authorization: str,
-    secret_key=settings.SECRET_KEY,
+    secret_key=config.SECRET_KEY,
 ) -> dict | None:
     try:
         token = authorization.split(" ")[1]
@@ -37,6 +37,6 @@ def verify_token(
 
 def generate_token(
     payload: JWTPayload,
-    secret_key=settings.SECRET_KEY,
+    secret_key=config.SECRET_KEY,
 ):
     return jwt.encode(payload.model_dump(), secret_key, algorithm="HS256")

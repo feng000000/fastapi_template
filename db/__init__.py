@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from config import settings
+from config import config
 
 _request_id_ctx_var: ContextVar[str | None] = ContextVar(
     "_request_id_ctx_var", default=None
@@ -44,7 +44,7 @@ class IsolationLevel(Enum):
 class DatabaseConnector:
     def __init__(self):
         self.engine = create_engine(
-            settings.DATABASE_URL,
+            config.DATABASE_URL,
             pool_size=100,
             max_overflow=50,
             pool_timeout=10,
@@ -83,7 +83,7 @@ class AsyncDatabaseConnector:
     def __init__(self):
         # 创建异步引擎
         self.engine = create_async_engine(
-            settings.DATABASE_URL,
+            config.DATABASE_URL,
             pool_size=50,
             max_overflow=50,
             pool_timeout=10,

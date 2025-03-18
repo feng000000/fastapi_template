@@ -6,11 +6,11 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class _BasicSettings(BaseSettings):
+class _BasicConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file="./docker/.env")
 
 
-class ProjectSettings(_BasicSettings):
+class ProjectConfig(_BasicConfig):
     # TODO: update ProjectSettings
     LOG_FILE_PATH: str
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -31,7 +31,7 @@ class ProjectSettings(_BasicSettings):
         return config
 
 
-class DatabaseSettings(_BasicSettings):
+class DatabaseConfig(_BasicConfig):
     DB_HOST: str
     DB_PORT: str
     DB_USRENAME: str
@@ -55,27 +55,26 @@ class DatabaseSettings(_BasicSettings):
         # )
 
 
-class RedisSettings(_BasicSettings):
+class RedisConfig(_BasicConfig):
     REDIS_HOST: str
     REDIS_PORT: int
+    REDIS_USERNAME: str
     REDIS_PASSWORD: str
     REDIS_DB: int
 
-    @cached_property
-    def REDIS_URL(self) -> str:  # noqa: N802
-        return (
-            "redis://"
-            f":{self.REDIS_PASSWORD}"
-            f"@{self.REDIS_HOST}:{self.REDIS_PORT}"
-            f"/{self.REDIS_DB}"
-        )
+
+class VectorDBConfig(_BasicConfig):
+    VDB_BASE_URL: str = "https://paas-api.helixlife.dev/vector/v1"
+    VDB_TIMEOUT_SECONDS: int
+    VDB_REQUEST_INTERVAL: float = 0.05
 
 
-class Settings(
-    DatabaseSettings,
-    RedisSettings,
-    ProjectSettings,
+class Config(
+    DatabaseConfig,
+    RedisConfig,
+    ProjectConfig,
+    VectorDBConfig,
 ): ...
 
 
-settings = Settings()  # type: ignore
+config = Config()  # type: ignore
