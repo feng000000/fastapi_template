@@ -1,0 +1,51 @@
+services:
+  api:
+    image: llm-guard-api:latest
+    restart: always
+    environment:
+      LOG_FILE_PATH: ${LOG_FILE_PATH:-/app/api.log}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "curl --fail --silent http://127.0.0.1:8000/ping | grep -q pong" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+    ports:
+      - 8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      PGUSER: ${DB_USRENAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aipoch123456}
+      POSTGRES_DB: ${DB_DATABASE:-aipoch}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql/data
+    # ports:
+    #   - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - ./volumes/redis/data:/data
+    command: redis-server --requirepass 123456
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 10
+    # ports:
+    #   - "6379:6379"
