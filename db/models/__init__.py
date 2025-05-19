@@ -1,21 +1,17 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, TypeAlias
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict
 from sqlmodel import JSON, Column, Field, Index, SQLModel
 
-AUTO_UPDATE: TypeAlias = Annotated[
-    datetime | None,
-    Field(
-        default_factory=datetime.now,
-        nullable=False,
-        sa_column_kwargs={
-            "onupdate": datetime.now,
-        },
-    ),
-]
+AUTO_UPDATE = Field(
+    default_factory=datetime.now,
+    nullable=False,
+    sa_column_kwargs={
+        "onupdate": datetime.now,
+    },
+)
 
 
 # TODO: define Enum
@@ -45,5 +41,5 @@ class ExampleTable(SQLModel, table=True):
 
     enum_field: EnumField
 
-    created_at: datetime | None = Field(default_factory=datetime.now)
-    updated_at: AUTO_UPDATE
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = AUTO_UPDATE

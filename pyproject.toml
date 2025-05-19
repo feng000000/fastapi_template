@@ -9,7 +9,12 @@ readme = "README.md"
 python = "^3.10"
 fastapi = "^0.115.5"
 pydantic-settings = "^2.6.1"
-redis = "^5.2.1"
+redis = {extras = ["hiredis"], version = "^6.1.0"}
+sqlalchemy = "^2.0.37"
+sqlmodel = "^0.0.22"
+alembic = "^1.14.0"
+httpx = "^0.28.1"
+asyncpg = "^0.30.0"
 
 
 [tool.poetry.group.dev.dependencies]
