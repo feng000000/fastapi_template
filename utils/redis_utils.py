@@ -15,8 +15,8 @@ class RedisClient:
         username: str,
         password: str,
     ):
-        self.redis_client = redis.Redis()
-        self.redis_client.connection_pool = redis.ConnectionPool(
+        self._client = redis.Redis()
+        self._client.connection_pool = redis.ConnectionPool(
             host=host,
             port=port,
             username=username,
@@ -34,13 +34,13 @@ class RedisClient:
         return "custom_prefix:"
 
     def get(self, key) -> Any | None:
-        return self.redis_client.get(self.prefix() + key)
+        return self._client.get(self.prefix() + key)
 
     def set(self, key, value, ex=None):
-        return self.redis_client.set(self.prefix() + key, value, ex=ex)
+        return self._client.set(self.prefix() + key, value, ex=ex)
 
     def delete(self, key):
-        return self.redis_client.delete(self.prefix() + key)
+        return self._client.delete(self.prefix() + key)
 
 
 class AsyncRedisClient:
@@ -83,6 +83,12 @@ class AsyncRedisClient:
             self._client = await self.init_client()
 
         await self._client.set(self.prefix() + key, value, ex=ex)
+
+    async def delete(self, key):
+        if self._client is None:
+            self._client = await self.init_client()
+
+        return self._client.delete(self.prefix() + key)
 
 
 redis_client = RedisClient(
