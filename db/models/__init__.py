@@ -39,6 +39,14 @@ class ExampleTable(SQLModel, table=True):
     # dict/list data
     table_info: dict = Field(sa_column=Column(JSON))
 
+    # 1. 新建表时指定 Enum 列, 迁移脚本直接使用
+    #   sa.Column('xxx', sa.Enum('enum1', 'enum2', name='enum_name')
+    #   即可
+    # 2. 如果是修改现有列为 Enum 列, 需要手动创建 Enum
+    #   enum_name = sa.Enum('xxx', 'enum1', 'enum2', name='enum_name')
+    #   enum_name.create(op.get_bind())
+    # -1. downgrade() 中需要删除 创建的 Enum
+    #   sa.Enum(name='enum_name').drop(op.get_bind())
     enum_field: EnumField
 
     created_at: datetime = Field(default_factory=datetime.now)
