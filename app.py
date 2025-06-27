@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import config
 from controllers import api_router
 from middlewares import CustomerMiddleware
+from utils.redis_utils import redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ async def lifespan(app: FastAPI):
     # some init operations
     init_logging()
     yield
+    await redis_client.aclose()
     # some atexit operations
 
 

@@ -1,7 +1,7 @@
 from typing import Any
 
-import aioredis
 import redis
+from redis import asyncio as aioredis
 
 from config import config
 
@@ -43,6 +43,7 @@ class RedisClient:
         return self._client.delete(self.prefix() + key)
 
 
+# Singleton
 class AsyncRedisClient:
     def __init__(
         self,
@@ -68,6 +69,10 @@ class AsyncRedisClient:
             decode_responses=False,
         )
 
+    async def aclose(self):
+        if self._client is not None:
+            await self._client.aclose()
+
     # TODO: update prefix
     def prefix(self):
         return "custom_prefix:"
@@ -91,7 +96,8 @@ class AsyncRedisClient:
         return self._client.delete(self.prefix() + key)
 
 
-redis_client = RedisClient(
+# redis_client = RedisClient(
+redis_client = AsyncRedisClient(
     host=config.REDIS_HOST,
     port=config.REDIS_PORT,
     db=config.REDIS_DB,
