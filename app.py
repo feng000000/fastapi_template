@@ -1,11 +1,10 @@
-import atexit
-import fcntl
 import logging
 from contextlib import asynccontextmanager
 from logging.handlers import TimedRotatingFileHandler
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from filelock import FileLock
 
 from config import config
 from controllers import api_router
@@ -14,6 +13,8 @@ from utils.redis_utils import redis_client
 
 logger = logging.getLogger(__name__)
 
+_FILELOCK = FileLock(".log.lock", timeout=0.05)
+
 
 def init_logging():
     handler = [
@@ -21,9 +22,9 @@ def init_logging():
         logging.StreamHandler(),
     ]
 
-    file_lock = open("./api.lock", "wb")
     try:
-        fcntl.flock(file_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        global _FILELOCK
+        _FILELOCK.acquire()  # _FILELOCK.release()
         handler.append(
             TimedRotatingFileHandler(
                 config.LOG_FILE_PATH,
@@ -35,12 +36,6 @@ def init_logging():
         )
     except Exception:
         pass
-
-    def unlock():
-        fcntl.flock(file_lock, fcntl.LOCK_UN)
-        file_lock.close()
-
-    atexit.register(unlock)
 
     logging.basicConfig(
         level=config.LOG_LEVEL,
