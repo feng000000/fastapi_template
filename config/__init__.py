@@ -34,7 +34,7 @@ class ProjectConfig(_BasicConfig):
 class DatabaseConfig(_BasicConfig):
     DB_HOST: str
     DB_PORT: str
-    DB_USRENAME: str
+    DB_USERNAME: str
     DB_PASSWORD: str
     DB_DATABASE: str
 
@@ -42,14 +42,14 @@ class DatabaseConfig(_BasicConfig):
     def DATABASE_URL(self) -> str:  # noqa: N802
         return (
             "postgresql://"
-            f"{self.DB_USRENAME}:{self.DB_PASSWORD}"
+            f"{self.DB_USERNAME}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}"
             f"/{self.DB_DATABASE}"
         )
         # async database url
         # return (
         #     "postgresql+asyncpg://"
-        #     f"{self.DB_USRENAME}:{self.DB_PASSWORD}"
+        #     f"{self.DB_USERNAME}:{self.DB_PASSWORD}"
         #     f"@{self.DB_HOST}:{self.DB_PORT}"
         #     f"/{self.DB_DATABASE}"
         # )
