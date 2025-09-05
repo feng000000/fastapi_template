@@ -3,10 +3,12 @@ import logging
 from asyncio import Event, Future, Task
 from asyncio.queues import Queue
 from collections.abc import Awaitable
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class _CustomTask:
     def __init__(self, coro: Awaitable, future: Future) -> None:
         self.coro = coro

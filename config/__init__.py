@@ -2,7 +2,7 @@ import os
 from functools import cached_property
 from typing import Any, Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -68,6 +68,8 @@ class VectorDBConfig(_BasicConfig):
     VDB_TIMEOUT_SECONDS: int
     VDB_REQUEST_INTERVAL: float = 0.05
 
+    TEST_ENV: str = Field(default="123", description="test env")
+
 
 class Config(
     DatabaseConfig,
@@ -78,3 +80,32 @@ class Config(
 
 
 config = Config()  # type: ignore
+
+
+if __name__ == "__main__":
+    from pydantic_core import PydanticUndefinedType
+
+    def _check_define(value):
+        if isinstance(value, PydanticUndefinedType):
+            return None
+        return value
+
+    env_list: list[str] = []
+    for key, value in Config.model_fields.items():
+        description = _check_define(value.description)
+        is_required = value.is_required()
+        annotation = _check_define(value.annotation)
+        default = _check_define(value.default)
+
+        if description is not None:
+            env_list.append(f"# description: {description}")
+        env_list.append(f"# is_required: {is_required}")
+        if annotation is not None:
+            env_list.append(f"# type: {annotation.__name__}")
+        if default is not None:
+            env_list.append(f"# default: {default}")
+        env_list.append(f"{key}=")
+        env_list.append("")
+
+    with open("./.generated.env", "w") as f:
+        f.write("\n".join(env_list))
