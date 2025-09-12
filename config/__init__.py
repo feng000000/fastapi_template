@@ -83,6 +83,8 @@ config = Config()  # type: ignore
 
 
 if __name__ == "__main__":
+    from types import UnionType
+
     from pydantic_core import PydanticUndefinedType
 
     def _check_define(value):
@@ -98,13 +100,16 @@ if __name__ == "__main__":
         default = _check_define(value.default)
 
         if description is not None:
-            env_list.append(f"# description: {description}")
-        env_list.append(f"# is_required: {is_required}")
+            env_list.append(f"# {description}")
+        env_list.append(f"# required: {is_required}")
         if annotation is not None:
-            env_list.append(f"# type: {annotation.__name__}")
+            if isinstance(annotation, UnionType):
+                env_list.append(f"# type: {annotation}")
+            else:
+                env_list.append(f"# type: {annotation.__name__}")
         if default is not None:
             env_list.append(f"# default: {default}")
-        env_list.append(f"{key}=")
+        env_list.append(f"{key}=" + (default if default else ""))
         env_list.append("")
 
     with open("./.generated.env", "w") as f:
