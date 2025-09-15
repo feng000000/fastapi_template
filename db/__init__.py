@@ -1,9 +1,10 @@
+import logging
 from contextlib import asynccontextmanager, contextmanager
 from contextvars import ContextVar, Token
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -14,6 +15,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from config import config
 
+logger = logging.getLogger(__name__)
 _request_id_ctx_var: ContextVar[str | None] = ContextVar(
     "_request_id_ctx_var", default=None
 )
@@ -127,6 +129,38 @@ class AsyncDatabaseConnector:
             reset_session_id(token)
             if err:
                 raise err
+
+    async def create_partition_table(
+        self,
+        table_name: str,
+        partition_name: str,
+        start: str,
+        end: str,
+    ):
+        logger.info(f"try to create partition table: {partition_name}")
+        async with self.session_ctx() as session:
+            # 检查分区是否已存在
+            check_sql = text(f"""
+                SELECT 1 FROM pg_class
+                WHERE relname = '{partition_name}' AND relkind = 'r'
+            """)
+            result = await session.execute(check_sql)
+
+            if result.fetchone():
+                logger.info(f"{partition_name} already exists.")
+                return
+
+            # 创建新的分区
+            create_sql = text(f"""
+                CREATE TABLE {partition_name} PARTITION OF {table_name}
+                FOR VALUES FROM ('{start}') TO ('{end}');
+            """)
+
+            await session.execute(create_sql)
+            await session.commit()
+            logger.info(
+                f"create {partition_name} for values ('{start}') TO ('{end}')"
+            )
 
 
 db = DatabaseConnector()
