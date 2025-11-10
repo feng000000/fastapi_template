@@ -77,18 +77,18 @@ class _RetrievalConfig(BaseModel):
     @classmethod
     def limit_validator(cls, v: Any):
         v = int(v)
-        assert (
-            v >= 1 and v < 100
-        ), f"retrieval_config.limit must belongs [1, 100] ({v})"
+        assert v >= 1 and v < 100, (
+            f"retrieval_config.limit must belongs [1, 100] ({v})"
+        )
         return v
 
     @field_validator("alpha")
     @classmethod
     def alpha_validator(cls, v: Any):
         v = float(v)
-        assert (
-            v > 0 and v <= 1
-        ), f"retrieval_config.alpha must belongs (0, 1] ({v})"
+        assert v > 0 and v <= 1, (
+            f"retrieval_config.alpha must belongs (0, 1] ({v})"
+        )
         return v
 
 
@@ -109,7 +109,7 @@ class QueryParam(BaseModel):
             elif item.operator == "contains_any":
                 doc_id_filter_num += len(item.value)
 
-        assert (
-            doc_id_filter_num <= 100
-        ), f"`doc_id` filters must <= 100 ({doc_id_filter_num})"
+        assert doc_id_filter_num <= 100, (
+            f"`doc_id` filters must <= 100 ({doc_id_filter_num})"
+        )
         return self

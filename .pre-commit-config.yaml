@@ -1,9 +1,9 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.3
+    rev: v0.12.10
     hooks:
       - id: ruff
-        args: [--config, ./pyproject.toml, --fix, --show-fixes]  # auto fix
+        args: [--config, ./pyproject.toml, --fix, --show-fixes, --preview]  # auto fix
       - id: ruff-format
 
   - repo: https://github.com/pylint-dev/pylint

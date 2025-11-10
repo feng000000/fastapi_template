@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager, contextmanager
 from contextvars import ContextVar, Token
 from enum import Enum
+from typing import cast
 from uuid import uuid4
 
 from sqlalchemy import create_engine, text
@@ -115,20 +116,22 @@ class AsyncDatabaseConnector:
     ):
         token = set_session_id(str(uuid4()))
 
-        await self.session.connection(
-            execution_options={"isolation_level": str(isolation_level)}
-        )
-
-        err = None
         try:
-            yield self.session()
-        except Exception as e:
-            err = e
+            # do nothing, only for type-hint
+            self.session = cast(type[AsyncSession], self.session)
+
+            yield self.session(
+                bind=self.engine.execution_options(
+                    isolation_level=str(isolation_level),
+                )
+            )
         finally:
+            # do nothing, only for type-hint
+            self.session = cast(
+                async_scoped_session[AsyncSession], self.session
+            )
             await self.session.remove()
             reset_session_id(token)
-            if err:
-                raise err
 
     async def create_partition_table(
         self,
