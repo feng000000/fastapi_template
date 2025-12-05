@@ -1,6 +1,9 @@
 import logging
+import sys
 from contextlib import asynccontextmanager
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,15 +20,15 @@ _FILELOCK = FileLock(".log.lock", timeout=0.05)
 
 
 def init_logging():
-    handler = [
+    handlers: list[logging.Handler] = [
+        logging.StreamHandler(stream=sys.stdout),
         logging.FileHandler(config.LOG_FILE_PATH),
-        logging.StreamHandler(),
     ]
 
     try:
         global _FILELOCK
         _FILELOCK.acquire()  # _FILELOCK.release()
-        handler.append(
+        handlers.append(
             TimedRotatingFileHandler(
                 config.LOG_FILE_PATH,
                 when="midnight",
@@ -37,11 +40,20 @@ def init_logging():
     except Exception:
         pass
 
-    logging.basicConfig(
-        level=config.LOG_LEVEL,
-        handlers=handler,
-        format="%(asctime)s [%(levelname)s] [%(name)s]: %(message)s\n",
-    )
+    root_logger = logging.getLogger()
+    root_logger.setLevel(config.LOG_LEVEL)
+
+    for handler in handlers:
+
+        def _converter(secs):
+            tz = ZoneInfo("Asia/Shanghai")
+            return datetime.fromtimestamp(secs, tz).timetuple()
+
+        handler.formatter = logging.Formatter(
+            "%(asctime)s [%(levelname)s] [%(name)s]: %(message)s"
+        )
+        handler.formatter.converter = _converter
+        root_logger.addHandler(handler)
 
     def init_logger(name: str, level: str = config.LOG_LEVEL):
         """specify logger's level"""
