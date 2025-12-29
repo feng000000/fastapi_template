@@ -46,7 +46,15 @@ class DatabaseConfig(_BasicConfig):
             f"@{self.DB_HOST}:{self.DB_PORT}"
             f"/{self.DB_DATABASE}"
         )
-        # async database url
+        # async database url (psycopg)
+        # return (
+        #     "postgresql://"
+        #     f"{self.DB_USERNAME}:{self.DB_PASSWORD}"
+        #     f"@{self.DB_HOST}:{self.DB_PORT}"
+        #     f"/{self.DB_DATABASE}"
+        # )
+
+        # async database url (asyncpg)
         # return (
         #     "postgresql+asyncpg://"
         #     f"{self.DB_USERNAME}:{self.DB_PASSWORD}"
