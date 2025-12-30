@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict
@@ -15,7 +15,7 @@ AUTO_UPDATE = Field(
 
 
 # TODO: define Enum
-class EnumField(str, Enum):
+class EnumField(StrEnum):
     field_1 = "field_1"
     field_2 = "field_2"
 

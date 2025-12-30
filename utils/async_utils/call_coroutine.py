@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 T = TypeVar("T")
 
 
-def call_coroutine(coro: Coroutine[Any, Any, T], timeout: float = 30) -> T:
+def call_coroutine[T](coro: Coroutine[Any, Any, T], timeout: float = 30) -> T:
     """
     用于在同步函数中调用异步函数
 

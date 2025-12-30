@@ -11,7 +11,7 @@ from filelock import FileLock
 
 from config import config
 from controllers import api_router
-from middlewares import CustomerMiddleware
+from middlewares import RequestTimerMiddleware, SuperviseTaskMiddleware
 from utils.redis_utils import redis_client
 
 logger = logging.getLogger(__name__)
@@ -94,7 +94,8 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.add_middleware(CustomerMiddleware)
+    app.add_middleware(SuperviseTaskMiddleware)
+    app.add_middleware(RequestTimerMiddleware)
 
     app.include_router(api_router, prefix="/api")
     app.add_api_route("healthy", endpoint=lambda: "success")
