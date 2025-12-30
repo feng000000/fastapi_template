@@ -22,15 +22,15 @@ _request_id_ctx_var: ContextVar[str | None] = ContextVar(
 )
 
 
-def get_session_id() -> str | None:
+def _get_session_id() -> str | None:
     return _request_id_ctx_var.get()
 
 
-def set_session_id(value: str) -> Token:
+def _set_session_id(value: str) -> Token:
     return _request_id_ctx_var.set(value)
 
 
-def reset_session_id(token: Token):
+def _reset_session_id(token: Token):
     _request_id_ctx_var.reset(token)
 
 
@@ -56,7 +56,7 @@ class DatabaseConnector:
         )
         self.session = scoped_session(
             sessionmaker(bind=self.engine),
-            get_session_id,
+            _get_session_id,
         )
 
     @contextmanager
@@ -64,7 +64,7 @@ class DatabaseConnector:
         self,
         isolation_level=IsolationLevel.READ_COMMITTED,
     ):
-        token = set_session_id(str(uuid4()))
+        token = _set_session_id(str(uuid4()))
 
         self.session.connection(
             execution_options={"isolation_level": str(isolation_level)}
@@ -77,7 +77,7 @@ class DatabaseConnector:
             err = e
         finally:
             self.session.remove()
-            reset_session_id(token)
+            _reset_session_id(token)
             if err:
                 raise err
 
@@ -100,7 +100,7 @@ class AsyncDatabaseConnector:
                 autoflush=True,
                 expire_on_commit=False,
             ),
-            scopefunc=get_session_id,
+            scopefunc=_get_session_id,
         )
 
     async def close(self):
@@ -114,7 +114,7 @@ class AsyncDatabaseConnector:
         self,
         isolation_level=IsolationLevel.READ_COMMITTED,
     ):
-        token = set_session_id(str(uuid4()))
+        token = _set_session_id(str(uuid4()))
 
         try:
             # do nothing, only for type-hint
@@ -131,7 +131,7 @@ class AsyncDatabaseConnector:
                 async_scoped_session[AsyncSession], self.session
             )
             await self.session.remove()
-            reset_session_id(token)
+            _reset_session_id(token)
 
     async def create_partition_table(
         self,
