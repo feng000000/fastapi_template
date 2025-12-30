@@ -3,7 +3,7 @@ repos:
     rev: v0.14.8
     hooks:
       - id: ruff
-        args: [--config, ./pyproject.toml, --fix, --show-fixes, --preview]  # auto fix
+        args: [--config, ./pyproject.toml, --fix, --show-fixes]  # auto fix
       - id: ruff-format
 
   - repo: https://github.com/pylint-dev/pylint

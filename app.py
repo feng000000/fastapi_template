@@ -11,6 +11,7 @@ from filelock import FileLock
 
 from config import config
 from controllers import api_router
+from exceptions.exception_handler import register_exception_handler
 from middlewares import RequestTimerMiddleware, SuperviseTaskMiddleware
 from utils.redis_utils import redis_client
 
@@ -100,6 +101,7 @@ def create_app():
     app.include_router(api_router, prefix="/api")
     app.add_api_route("healthy", endpoint=lambda: "success")
 
+    register_exception_handler(app)
     return app
 
 
