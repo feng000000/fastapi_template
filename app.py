@@ -55,6 +55,13 @@ def init_logging():
         handler.formatter.converter = _converter
         root_logger.addHandler(handler)
 
+    # only print log on the console
+    # logging.basicConfig(
+    #     level=config.LOG_LEVEL,
+    #     stream=sys.stdout,
+    #     format="%(asctime)s [%(levelname)s] [%(name)s]: %(message)s",
+    # )
+
     def init_logger(name: str, level: str = config.LOG_LEVEL):
         """specify logger's level"""
         logger = logging.getLogger(name)
