@@ -34,9 +34,15 @@ FROM base AS production
 #     && chown -R ${APP_USER}:${APP_USER} /tmp \
 #     && chown -R ${APP_USER}:${APP_USER} ${HOME_DIR}
 
-ENV PATH="${HOME_DIR}/.venv/bin:${PATH}"
+
+
+COPY ./pyproject.toml /app/pyproject.toml
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
 
 COPY . ${HOME_DIR}
+
+ENV PATH="${HOME_DIR}/.venv/bin:${PATH}"
 
 EXPOSE 8000
 

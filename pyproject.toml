@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.17.2",
     "apscheduler>=3.11.1",
     "asyncpg>=0.31.0",
+    "cryptography>=46.0.3",
     "fastapi>=0.123.9",
     "filelock>=3.20.1",
     "httpx>=0.28.1",
