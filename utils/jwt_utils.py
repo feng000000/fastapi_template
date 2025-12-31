@@ -26,7 +26,7 @@ class JWTPayload(BaseModel):
     )
     aud: str | Sequence[str] | None = Field(
         default=None,
-        description="Audience; Token 的受众, 例如 user",
+        description="Audience; Token 的受众, 例如 user, jwt中包含 aud 时, pyjwt 会默认校验",
     )
     iss: str | None = Field(default=None, description="Issuer; 签发者")
 
@@ -68,13 +68,17 @@ def generate_token(
 
 
 if __name__ == "__main__":
-    with open("./private_rsa.pem") as f:
+    with open("./.test_private_rsa.pem") as f:
         private = f.read()
-    with open("./public_rsa.pem") as f:
+    with open("./.test_public_rsa.pem") as f:
         public = f.read()
 
     res = generate_token(
-        payload=JWTPayload(payload={"data": {"inner_data": 123}}),
+        payload=JWTPayload(
+            payload={"data": {"inner_data": 123}},
+            sub="123123",
+            iss="me",
+        ),
         secret_key=private,
         algorithm="RS256",
     )
