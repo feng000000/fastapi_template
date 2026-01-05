@@ -78,39 +78,38 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
-# TODO: async migrations
+# TODO: asynchronous run_migrations_online()
 # import asyncio
 # from sqlalchemy.engine import Connection
 # from sqlalchemy.ext.asyncio import async_engine_from_config
-# def do_run_migrations(connection: Connection) -> None:
-#     context.configure(connection=connection, target_metadata=target_metadata)
-
-#     with context.begin_transaction():
-#         context.run_migrations()
-
-
-# async def run_async_migrations() -> None:
-#     """Run migrations in 'online' mode.
-
-#     In this scenario we need to create an Engine
-#     and associate a connection with the context.
-
-#     """
-#     connectable = async_engine_from_config(
-#         config.get_section(config.config_ini_section, {}),
-#         prefix="sqlalchemy.",
-#         poolclass=pool.NullPool,
-#     )
-
-#     async with connectable.connect() as connection:
-#         await connection.run_sync(do_run_migrations)
-
-#     await connectable.dispose()
-
-
 # def run_migrations_online() -> None:
 #     """Run migrations in 'online' mode."""
-#     asyncio.run(run_async_migrations())
+
+#     def _do_run_migrations(connection: Connection) -> None:
+#         context.configure(connection=connection, target_metadata=target_metadata)
+
+#         with context.begin_transaction():
+#             context.run_migrations()
+
+#     async def _run_async_migrations() -> None:
+#         """Run migrations in 'online' mode.
+
+#         In this scenario we need to create an Engine
+#         and associate a connection with the context.
+
+#         """
+#         connectable = async_engine_from_config(
+#             config.get_section(config.config_ini_section, {}),
+#             prefix="sqlalchemy.",
+#             poolclass=pool.NullPool,
+#         )
+
+#         async with connectable.connect() as connection:
+#             await connection.run_sync(_do_run_migrations)
+
+#         await connectable.dispose()
+
+#     asyncio.run(_run_async_migrations())
 
 
 if context.is_offline_mode():
