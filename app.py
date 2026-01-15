@@ -99,7 +99,7 @@ def create_app():
     app.add_middleware(RequestTimerMiddleware)
 
     app.include_router(api_router, prefix="/api")
-    app.add_api_route("healthy", endpoint=lambda: "success")
+    app.add_api_route("ping", endpoint=lambda: "ping")
 
     register_exception_handler(app)
     return app
