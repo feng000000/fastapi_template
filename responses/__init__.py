@@ -28,5 +28,5 @@ class ErrorResponse(JSONResponse):
 
 
 class ValidationErrorResponse(ErrorResponse):
-    def __init__(self, msg: str = "validation error") -> None:
-        super().__init__(code=400, msg=msg)
+    def __init__(self) -> None:
+        super().__init__(code=400, msg="validation error")
