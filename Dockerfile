@@ -35,8 +35,8 @@ FROM base AS production
 #     && chown -R ${APP_USER}:${APP_USER} ${HOME_DIR}
 
 
-
 COPY ./pyproject.toml ${HOME_DIR}/pyproject.toml
+COPY ./uv.lock ${HOME_DIR}/uv.lock
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
