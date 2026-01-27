@@ -95,8 +95,10 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.add_middleware(SuperviseTaskMiddleware)
+    # 如果 starlette.BaseMiddleware 和 ASGI 中间件定义混用
+    # starlette.BaseMiddleware 需要在内层 (先添加, 后执行)
     app.add_middleware(RequestTimerMiddleware)
+    app.add_middleware(SuperviseTaskMiddleware)
 
     app.include_router(api_router, prefix="/api")
     app.add_api_route("ping", endpoint=lambda: "ping")
