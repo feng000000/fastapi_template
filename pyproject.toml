@@ -12,6 +12,7 @@ dependencies = [
     "fastapi>=0.123.9",
     "filelock>=3.20.1",
     "httpx>=0.28.1",
+    "pycurl>=7.45.7",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.10.1",
