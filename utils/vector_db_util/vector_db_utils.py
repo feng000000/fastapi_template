@@ -2,13 +2,13 @@ import asyncio
 import json
 import logging
 import time
-from collections.abc import Coroutine
+from collections.abc import Callable
 from typing import Any, Literal, TypeVar
 
 import httpx
 
 from config import config
-from utils.task_queue import TaskQueue
+from utils.task_queue import AsyncTaskQueue
 
 from .exceptions import VectorDBError
 from .schemas import (
@@ -50,14 +50,14 @@ def _error_log(res: dict) -> str | None:
 
 
 class _RequestLimiter:
-    _task_queue = TaskQueue(interval=config.VDB_REQUEST_INTERVAL)
+    _task_queue = AsyncTaskQueue(interval_s=config.VDB_REQUEST_INTERVAL)
 
     @classmethod
-    def _schedule_task(cls, coro: Coroutine):
+    async def _schedule_task(cls, func: Callable):
         if not cls._task_queue.running:
-            cls._task_queue.schedule()
+            await cls._task_queue.schedule()
 
-        return cls._task_queue.add_task(coro)
+        return await cls._task_queue.add_task(None, func)
 
     @classmethod
     async def request_vector_db(
@@ -124,8 +124,8 @@ class _RequestLimiter:
             )
             return json_data
 
-        res: dict = await cls._schedule_task(operation())
-        return res
+        task = await cls._schedule_task(operation)
+        return await task
 
 
 class VectorDBOperator:

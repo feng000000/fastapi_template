@@ -79,11 +79,24 @@ class VectorDBConfig(_BasicConfig):
     TEST_ENV: str = Field(default="123", description="test env")
 
 
+class HelixConfig(_BasicConfig):
+    HELIXLIFE_BASE_URL: str
+
+
+class COSConfig(_BasicConfig):
+    COS_REGION: str
+    COS_SECRET_ID: str
+    COS_SECRET_KEY: str
+    COS_DOMAIN: str
+
+
 class Config(
     DatabaseConfig,
     RedisConfig,
     ProjectConfig,
     VectorDBConfig,
+    HelixConfig,
+    COSConfig,
 ): ...
 
 

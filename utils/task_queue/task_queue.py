@@ -31,6 +31,9 @@ class Task[**P, R]:
 
         self._task_instance: asyncio.Task[R] | None = None
 
+    def __await__(self):
+        return self.future.__await__()
+
     async def exec(self) -> R | None:
         self._executed = True
         try:

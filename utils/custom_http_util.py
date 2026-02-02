@@ -48,7 +48,7 @@ FormFile = tuple[str, BinaryIO] | tuple[str, BinaryIO, str]
 class CustomHTTP:
     def __init__(self):
         self._curl = pycurl.Curl()
-        self._curl.setopt(self._curl.CAINFO, certifi.where())
+        self._curl.setopt(pycurl.CAINFO, certifi.where())
 
     def close(self):
         self._curl.close()
@@ -87,7 +87,7 @@ class CustomHTTP:
                     method="POST",
                     url="http://example.com:8000/post/file",
                     query_param={"query_param": "123"},
-                    form_data={"form_key": "safassfsa"},
+                    form_data={"form_key": "test_data"},
                     form_files={
                         "file_key": ("test.md", file_0),
                         "file_list_key": [
@@ -117,12 +117,12 @@ class CustomHTTP:
 
         resp = Response()
         if interface:
-            self._curl.setopt(self._curl.INTERFACE, interface)
-        self._curl.setopt(self._curl.URL, url)
-        self._curl.setopt(self._curl.FOLLOWLOCATION, follow_redirect)
-        self._curl.setopt(self._curl.TIMEOUT, max(0, timeout_s))
-        self._curl.setopt(self._curl.WRITEDATA, resp.body)
-        self._curl.setopt(self._curl.HEADERFUNCTION, resp.set_header)
+            self._curl.setopt(pycurl.INTERFACE, interface)
+        self._curl.setopt(pycurl.URL, url)
+        self._curl.setopt(pycurl.FOLLOWLOCATION, follow_redirect)
+        self._curl.setopt(pycurl.TIMEOUT, max(0, timeout_s))
+        self._curl.setopt(pycurl.WRITEDATA, resp.body)
+        self._curl.setopt(pycurl.HEADERFUNCTION, resp.set_header)
 
         if method == "POST":
             if json_data:
@@ -135,12 +135,12 @@ class CustomHTTP:
             elif form_data:
                 self._set_form_data(form_data=form_data)
             else:
-                self._curl.setopt(self._curl.POST, 1)
-                self._curl.setopt(self._curl.POSTFIELDS, "")
+                self._curl.setopt(pycurl.POST, 1)
+                self._curl.setopt(pycurl.POSTFIELDS, "")
 
         await asyncio.to_thread(self._curl.perform)
 
-        resp.status_code = self._curl.getinfo(self._curl.RESPONSE_CODE)
+        resp.status_code = self._curl.getinfo(pycurl.RESPONSE_CODE)
 
         resp.body.seek(0)
         return resp
@@ -149,13 +149,13 @@ class CustomHTTP:
         """设置 JSON 格式请求体 (application/json)"""
         post_data = json.dumps(json_data).encode("utf-8")
         self._curl.setopt(
-            self._curl.HTTPHEADER,
+            pycurl.HTTPHEADER,
             [
                 "Content-Type: application/json",
                 f"Content-Length: {len(post_data)}",
             ],
         )
-        self._curl.setopt(self._curl.POSTFIELDS, post_data)
+        self._curl.setopt(pycurl.POSTFIELDS, post_data)
 
     def _set_form_files(
         self,
@@ -171,15 +171,11 @@ class CustomHTTP:
 
         def _construct_file(key: str, file: FormFile):
             return key, (
-                self._curl.FORM_BUFFER,
+                pycurl.FORM_BUFFER,
                 file[0],  # name
-                self._curl.FORM_BUFFERPTR,
+                pycurl.FORM_BUFFERPTR,
                 file[1].read(),  # bytes
-                *(
-                    [self._curl.FORM_CONTENTTYPE, file[2]]
-                    if len(file) == 3
-                    else []
-                ),
+                *([pycurl.FORM_CONTENTTYPE, file[2]] if len(file) == 3 else []),
             )
 
         for key, value in form_files.items():
@@ -189,8 +185,8 @@ class CustomHTTP:
             else:
                 post_data.append(_construct_file(key, value))
 
-        self._curl.setopt(self._curl.HTTPPOST, post_data)
+        self._curl.setopt(pycurl.HTTPPOST, post_data)
 
     def _set_form_data(self, form_data: dict):
         """设置表单格式请求体 (application/x-www-form-urlencoded)"""
-        self._curl.setopt(self._curl.POSTFIELDS, urlencode(form_data))
+        self._curl.setopt(pycurl.POSTFIELDS, urlencode(form_data))
