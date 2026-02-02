@@ -1,6 +1,5 @@
-from .task_queue import TaskQueue, get_global_task_queue
+from .task_queue import AsyncTaskQueue
 
 __all__ = [
-    "TaskQueue",
-    "get_global_task_queue",
+    "AsyncTaskQueue",
 ]
