@@ -48,4 +48,5 @@ EXPOSE 8000
 
 RUN chmod +x ${HOME_DIR}/docker/entrypoint.sh
 
+# 加了 -c 参数才能正确替换 ${HOME_DIR}
 ENTRYPOINT ["/bin/bash", "-c", "${HOME_DIR}/docker/entrypoint.sh"]
