@@ -1,5 +1,5 @@
-import os
 from functools import cached_property
+from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import Field, field_validator
@@ -19,9 +19,9 @@ class ProjectConfig(_BasicConfig):
     @field_validator("LOG_FILE_PATH")
     @classmethod
     def validate_log_file_path(cls, value: Any):
-        log_dir = os.path.dirname(value)
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
+        value = Path(value)
+        if not value.exists():
+            value.mkdir(parents=True, exist_ok=True)
         return value
 
     @cached_property

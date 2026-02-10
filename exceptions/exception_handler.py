@@ -1,5 +1,6 @@
 import logging
 import traceback
+from collections.abc import Callable
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ValidationException
@@ -10,10 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def register_exception_handler(app: FastAPI):
-    def _register_handler(
+    def _register_handler[**P, R: ErrorResponse](
         exc_type: type[Exception],
-        resp_type: type[ErrorResponse],
-        resp_message: str,
+        resp_type: Callable[P, R],
+        *arg: P.args,
+        **kw: P.kwargs,
     ):
         def _handler(_: Request, exc: Exception):
             if isinstance(exc, ValidationException):
@@ -22,17 +24,16 @@ def register_exception_handler(app: FastAPI):
                 logger.error(
                     f"catch exception\ntraceback: {traceback.format_exc()}"
                 )
-            return resp_type(msg=resp_message)
+            return resp_type(*arg, **kw)
 
         app.add_exception_handler(exc_type, _handler)
 
     _register_handler(
         exc_type=ValidationException,
         resp_type=ValidationErrorResponse,
-        resp_message="validation error",
     )
     _register_handler(
         exc_type=Exception,
         resp_type=ErrorResponse,
-        resp_message="internal server error",
+        msg="internal server error",
     )

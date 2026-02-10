@@ -11,4 +11,4 @@ logger = logging.getLogger(__name__)
 
 @router.get("/")
 async def hello_world():
-    return SuccessResponse()
+    return SuccessResponse(data=[])
