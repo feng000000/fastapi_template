@@ -80,6 +80,9 @@ class VectorDBConfig(_BasicConfig):
 
 
 class HelixConfig(_BasicConfig):
+    # 测试: https://api.helixlife.net
+    # 预发: https://api.helixlife.org
+    # 生产: https://api.helixlife.cn
     HELIXLIFE_BASE_URL: str
 
 
