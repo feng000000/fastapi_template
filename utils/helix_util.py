@@ -10,7 +10,7 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
-_USER_INFO_ENDPOINT = f"{config.HELIXLIFE_BASE_URL}/user/users/profile"
+_USER_INFO_ENDPOINT = f"{config.HELIXLIFE_BASE_URL}/api/v1/user/users/profile"
 _SUCCESS_CODE = 20000
 
 
