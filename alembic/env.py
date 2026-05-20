@@ -16,7 +16,12 @@ if config.config_file_name is not None:
 
 # TODO: set database url
 from config import config as cfg
-config.set_main_option("sqlalchemy.url", cfg.DATABASE_URL)
+# config.set_main_option("sqlalchemy.url", cfg.DATABASE_URL)
+# 数据库密码中有 "%" 时会转义, 所以这里做替换
+config.set_main_option(
+    "sqlalchemy.url",
+    cfg.DATABASE_URL.replace(r"%", r"%%"),
+)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
