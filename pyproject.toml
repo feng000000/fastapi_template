@@ -28,6 +28,12 @@ dev = [
     "ruff>=0.14.8",
 ]
 
+# 清华源
+[[tool.uv.index]]
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
+default = true
+
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
