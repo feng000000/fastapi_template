@@ -1,9 +1,19 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import StrEnum
 from uuid import UUID, uuid4
 
+from logging import getLogger
+
+from dateutil.relativedelta import relativedelta
+
 from pydantic import ConfigDict
+from sqlmodel import DateTime
 from sqlmodel import JSON, Column, Field, Index, SQLModel
+
+from .. import db
+
+logger = getLogger(__name__)
+
 
 AUTO_UPDATE = Field(
     default_factory=datetime.now,
@@ -51,3 +61,56 @@ class ExampleTable(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = AUTO_UPDATE
+
+
+class PartitionTableExample(SQLModel, table=True):
+
+    model_config = ConfigDict(  # type: ignore
+        arbitrary_types_allowed=True,
+        validate_assignment=True,
+    )
+
+    __tablename__ = "moderation_records"  # type: ignore
+
+    __table_args__ = ({"postgresql_partition_by": "RANGE (created_at)"},)
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+
+    @classmethod
+    async def update_partition_table(cls):
+        """创建 当前月 和 下月 的分区表"""
+        table_name = str(cls.__tablename__)
+
+        async def create_date_partition_table(date_: datetime):
+            date_ = date_.replace(
+                day=1,
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            next_month = date_ + relativedelta(months=1)
+            partition_name = f"{table_name}_{date_.year:4}_{date_.month:02}"
+            start = date_.strftime("%Y-%m-%d %H:%M:%S%z")
+            end = next_month.strftime("%Y-%m-%d %H:%M:%S%z")
+
+            await db.create_partition_table_on_postgres(
+                table_name=table_name,
+                partition_name=partition_name,
+                start=start,
+                end=end,
+            )
+
+        try:
+            current = datetime.now(UTC)
+            await create_date_partition_table(current)
+
+            next_month = current + relativedelta(months=1)
+            await create_date_partition_table(next_month)
+        except Exception as e:
+            logger.error(f"failed create partitions: {type(e), e}")

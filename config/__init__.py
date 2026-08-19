@@ -47,8 +47,9 @@ class DatabaseConfig(_BasicConfig):
             f"/{self.DB_DATABASE}"
         )
         # async database url (psycopg)
+        # uv add "psycopg[binary,pool]"
         # return (
-        #     "postgresql://"
+        #     "postgresql+psycopg://"
         #     f"{self.DB_USERNAME}:{self.DB_PASSWORD}"
         #     f"@{self.DB_HOST}:{self.DB_PORT}"
         #     f"/{self.DB_DATABASE}"

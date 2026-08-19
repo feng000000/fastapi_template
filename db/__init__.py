@@ -133,13 +133,22 @@ class AsyncDatabaseConnector:
             await self.session.remove()
             _reset_session_id(token)
 
-    async def create_partition_table(
+    async def create_partition_table_on_postgres(
         self,
         table_name: str,
         partition_name: str,
         start: str,
         end: str,
     ):
+        """
+        创建分区表 (postgres)
+
+        Args:
+            table_name (str): 原表名
+            partition_name (str): 分区表名
+            start (str): 分区区间开始值
+            end (str): 分区区间结束值
+        """
         logger.info(f"try to create partition table: {partition_name}")
         async with self.session_ctx() as session:
             # 检查分区是否已存在
@@ -166,5 +175,5 @@ class AsyncDatabaseConnector:
             )
 
 
-db = DatabaseConnector()
-# db = AsyncDatabaseConnector()
+# db = DatabaseConnector()
+db = AsyncDatabaseConnector()
