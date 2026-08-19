@@ -112,7 +112,8 @@ class AsyncDatabaseConnector:
     @asynccontextmanager
     async def session_ctx(
         self,
-        isolation_level=IsolationLevel.READ_COMMITTED,
+        isolation_level = IsolationLevel.READ_COMMITTED,
+        auto_commit: bool = False,
     ):
         token = _set_session_id(str(uuid4()))
 
@@ -120,11 +121,19 @@ class AsyncDatabaseConnector:
             # do nothing, only for type-hint
             self.session = cast(type[AsyncSession], self.session)
 
-            yield self.session(
+            ret_session = self.session(
                 bind=self.engine.execution_options(
                     isolation_level=str(isolation_level),
                 )
             )
+
+            try:
+                yield ret_session
+                if auto_commit:
+                    await ret_session.commit()
+            except Exception as e:
+                await ret_session.rollback()
+                logger.error(f"error occurred in session ctx: {type(e), e}")
         finally:
             # do nothing, only for type-hint
             self.session = cast(
