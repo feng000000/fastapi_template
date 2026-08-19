@@ -9,6 +9,7 @@ from config import config
 class RedisClient:
     def __init__(
         self,
+        prefix: str,
         host: str,
         port: int,
         db: int,
@@ -16,6 +17,11 @@ class RedisClient:
         password: str,
     ):
         self._client = redis.Redis()
+        if not prefix.endswith(":"):
+            self.prefix = prefix + ":"
+        else:
+            self.prefix = prefix
+
         self._client.connection_pool = redis.ConnectionPool(
             host=host,
             port=port,
@@ -29,24 +35,21 @@ class RedisClient:
             },
         )
 
-    # TODO: update prefix
-    def prefix(self):
-        return "custom_prefix:"
-
     def get(self, key) -> Any | None:
-        return self._client.get(self.prefix() + key)
+        return self._client.get(self.prefix + key)
 
     def set(self, key, value, ex=None):
-        return self._client.set(self.prefix() + key, value, ex=ex)
+        return self._client.set(self.prefix + key, value, ex=ex)
 
     def delete(self, key):
-        return self._client.delete(self.prefix() + key)
+        return self._client.delete(self.prefix + key)
 
 
 # Singleton
 class AsyncRedisClient:
     def __init__(
         self,
+        prefix: str,
         host: str,
         port: int,
         db: int,
@@ -54,6 +57,11 @@ class AsyncRedisClient:
         password: str,
     ):
         self._client = None
+        if not prefix.endswith(":"):
+            self.prefix = prefix + ":"
+        else:
+            self.prefix = prefix
+
         self.host = host
         self.port = port
         self.db = db
@@ -73,31 +81,32 @@ class AsyncRedisClient:
         if self._client is not None:
             await self._client.aclose()
 
-    # TODO: update prefix
-    def prefix(self):
-        return "custom_prefix:"
-
     async def get(self, key) -> bytes | None:
         if self._client is None:
             self._client = await self.init_client()
 
-        return await self._client.get(self.prefix() + key)
+        res = await self._client.get(self.prefix + key)
+        assert res is None or isinstance(res, bytes)
+
+        return res
 
     async def set(self, key, value, ex=None) -> None:
         if self._client is None:
             self._client = await self.init_client()
 
-        await self._client.set(self.prefix() + key, value, ex=ex)
+        await self._client.set(self.prefix + key, value, ex=ex)
 
     async def delete(self, key):
         if self._client is None:
             self._client = await self.init_client()
 
-        return self._client.delete(self.prefix() + key)
+        return self._client.delete(self.prefix + key)
 
 
 # redis_client = RedisClient(
 redis_client = AsyncRedisClient(
+    # TODO: update prefix
+    prefix="custom-prefix:",
     host=config.REDIS_HOST,
     port=config.REDIS_PORT,
     db=config.REDIS_DB,
