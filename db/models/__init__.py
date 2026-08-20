@@ -9,20 +9,32 @@ from dateutil.relativedelta import relativedelta
 from pydantic import ConfigDict
 from sqlmodel import DateTime
 from sqlmodel import JSON, Column, Field, Index, SQLModel
+from sqlalchemy.dialects.postgresql import JSONB
+
 
 from .. import db
 
 logger = getLogger(__name__)
 
 
-AUTO_UPDATE = Field(
-    default_factory=datetime.now,
-    nullable=False,
-    sa_column_kwargs={
-        "onupdate": datetime.now,
-    },
-)
+# AUTO_UPDATE = Field(
+#     default_factory=datetime.now,
+#     nullable=False,
+#     sa_column_kwargs={
+#         "onupdate": datetime.now,
+#     },
+# )
 
+def AutoUpdateField():
+    return Field(
+        default_factory=lambda:datetime.now(UTC),
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            default=lambda:datetime.now(UTC),
+            onupdate=lambda:datetime.now(UTC),
+        ),
+    )
 
 # TODO: define Enum
 class EnumField(StrEnum):
@@ -48,6 +60,7 @@ class ExampleTable(SQLModel, table=True):
 
     # dict/list data
     table_info: dict = Field(sa_column=Column(JSON))
+    table_info_jsonb: dict = Field(sa_column=Column(JSONB, default={}))
 
     # 1. 新建表时指定 Enum 列, 迁移脚本直接使用
     #   sa.Column('xxx', sa.Enum('enum1', 'enum2', name='enum_name')
@@ -60,7 +73,7 @@ class ExampleTable(SQLModel, table=True):
     enum_field: EnumField
 
     created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = AUTO_UPDATE
+    updated_at: datetime = AutoUpdateField()
 
 
 class PartitionTableExample(SQLModel, table=True):
